@@ -581,33 +581,106 @@ Yes
 
 Записываем входные данные. Удобнее использовать словари для записи данных. 
 
-
-
-
-
-```python
-c = df[df['points']>df['points'][0]]['points'].count()
-
-output --> 11
-```
+На вход будут записываться данные через `input()` , также можно сделать через текстовый файл `input.txt`, это незначительное изменение, разница только в работе с неразделённым списком из текстового файла (например через циклы `for` и длину входного листа `len()`)
 
 
 ```python
-c = df[df['points']>df['points'][0]]['points'].count()
-
-output --> 11
+input()
+teams = {}
+for count in map(int, input().split()):
+    teams[count] = teams.get(count, 0) + 1
+rooms = {}
+for _ in range(int(input())):
+    capacity, quantity = map(int, input().split())
+    rooms[capacity] = rooms.get(capacity, 0) + quantity
 ```
 
+Пример:
 
 ```python
-c = df[df['points']>df['points'][0]]['points'].count()
+input --> 3
+input --> 1 2 3
+input --> 1
+input --> 3 2
 
-output --> 11
+output --> teams = {1: 1, 2: 1, 3: 1}
+output --> rooms = {3: 2}
+```
+То есть мы категоризировали входные данные по вместимости комнат `capacity` и количеству человек в команде `count`, записав всё в словари.
+
+Получим список из кортежей (size, count) и отсортируем в порядке убывания
+```python
+teams = sorted(teams.items(), reverse =True)
+rooms = sorted(rooms.items(), reverse =True)
+output --> [(3, 1), (2, 1), (1, 1)]
+output --> [(3, 2)]
 ```
 
+Проводим проверку на вместимость комнаты всех спортсменок из максимальной команды, записав данные из первых кортежей в переменные
+```python
+team_size, team_count = teams.pop(0)
+output --> team_size = 3
+output --> team_count = 1
 
+room_capacity, room_quantity = rooms.pop(0)
+output --> room_capacity = 3
+output --> room_quantity = 2
+```
+Проверка на вместимость:
+```python
+if team_size > room_capacity: 
+	print ("No")  # return "No" - после перепишем это всё для функции
+```
+Если проверку на вместимость прошли, тогда выбираем минимальное количество таких команд или комнат и вычитаем их из общего числа комнат и команд (то есть минимум по размеру, который уже будет заселён, либо останутся команды этого размера, которые не заселены, либо комнаты, которые ещё пустуют.
+```python
+delta = min(team_count, room_quantity)
+team_count    -= delta
+room_quantity -= delta
+```
+И мы должны повторить это до тех пор, пока все команды команды не будут расселены или не закончатся комнаты:
+```python
+while (teams or team_count) and (rooms or room_quantity):
+```
+И последнее, необходимо чтобы мы брали новые кортежи из списков, только после обнуления предыдущего значения, значит до цикла примем их за 0
+```python
+def func_set(teams, rooms):
 
+team_count = room_quantity = 0
+while (teams or team_count) and (rooms or room_quantity):
+	if team_count == 0: 
+            team_size, team_count = teams.pop()
+	if room_quantity == 0: 
+            room_capacity, room_quantity = rooms.pop()
+	if team_size > room_capacity: 
+            return "No"
+	    
+	delta = min(team_count, room_quantity)
+	team_count    -= delta
+	room_quantity -= delta
+```
 
+И возвращаем `No`, если не смогли расселить всех спортсменок, иначе возвращаем `Yes`
+```python
+return "No" if teams or team_count else "Yes"
+```
+
+Объединяя всё в функцию, получим следующий результат:
+
+```python
+input()
+teams = {}
+for count in map(int, input().split()):
+    teams[count] = teams.get(count, 0) + 1
+rooms = {}
+for _ in range(int(input())):
+    capacity, quantity = map(int, input().split())
+    rooms[capacity] = rooms.get(capacity, 0) + quantity
+
+func_set(teams, rooms)
+```
+
+---
+<br>
 
 
 
